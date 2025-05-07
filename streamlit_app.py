@@ -1,7 +1,7 @@
 import streamlit as st
 from openai import OpenAI
 from openai.types.chat import ChatCompletionMessageParam
-
+import fitz
 st.set_page_config(page_title="GPT 웹앱", layout="centered")
 
 # --- 사이드바 메뉴 ---
@@ -124,61 +124,63 @@ elif page == "📚 도서관 챗봇":
             st.error(f"❌ 오류 발생: {str(e)}")
 
 
-# --- PDF 챗봇 페이지 ---
+# --- PDF에서 텍스트 추출 ---
+def extract_text_from_pdf(uploaded_pdf) -> str:
+    pdf = fitz.open(stream=uploaded_pdf.read(), filetype="pdf")
+    text = ""
+    for page in pdf:
+        text += page.get_text()
+    return text
+
+# --- 페이지 시작 ---
 elif page == "📄 문서 챗봇":
-    st.markdown("<h1 style='text-align: center;'>📄 문서 기반 챗봇</h1>", unsafe_allow_html=True)
+    st.markdown("<h1 style='text-align: center;'>📄 PDF 기반 문서 챗봇</h1>", unsafe_allow_html=True)
 
-    # 문서 업로드
-    uploaded_file = st.file_uploader("📂 텍스트 파일을 업로드하세요 (.txt)", type="txt")
+    # PDF 업로드
+    uploaded_pdf = st.file_uploader("📂 PDF 파일을 업로드하세요", type="pdf")
 
-    # 문서 로딩
-    if uploaded_file:
-        document_text = uploaded_file.read().decode("utf-8")
+    if uploaded_pdf:
+        try:
+            document_text = extract_text_from_pdf(uploaded_pdf)
+            st.success("✅ PDF 텍스트 추출 성공!")
 
-        st.success("✅ 문서가 성공적으로 업로드되었습니다.")
+            if "pdfchat_history" not in st.session_state:
+                st.session_state.pdfchat_history = []
 
-        # 대화 이력 초기화
-        if "docchat_history" not in st.session_state:
-            st.session_state.docchat_history = []
+            if st.button("🧹 대화 초기화"):
+                st.session_state.pdfchat_history = []
 
-        if st.button("🧹 대화 초기화"):
-            st.session_state.docchat_history = []
+            # 이전 대화 출력
+            for msg in st.session_state.pdfchat_history:
+                if msg["role"] == "user":
+                    st.markdown(user_css.format(msg["content"]), unsafe_allow_html=True)
+                else:
+                    st.markdown(bot_css.format(msg["content"]), unsafe_allow_html=True)
 
-        # 대화 출력
-        for msg in st.session_state.docchat_history:
-            if msg["role"] == "user":
-                st.markdown(user_css.format(msg["content"]), unsafe_allow_html=True)
-            else:
-                st.markdown(bot_css.format(msg["content"]), unsafe_allow_html=True)
+            # 사용자 질문
+            if query := st.chat_input("업로드된 문서에 대해 질문하세요..."):
+                st.session_state.pdfchat_history.append({"role": "user", "content": query})
+                st.markdown(user_css.format(query), unsafe_allow_html=True)
 
-        # 사용자 질문
-        if query := st.chat_input("문서에 대해 질문하세요..."):
-            st.session_state.docchat_history.append({"role": "user", "content": query})
-            st.markdown(user_css.format(query), unsafe_allow_html=True)
-
-            try:
-                client = OpenAI(api_key=st.session_state.api_key)
-
-                response = client.chat.completions.create(
-                    model="gpt-4-1106-preview",
-                    messages=[
-                        {
-                            "role": "system",
-                            "content": "당신은 업로드된 문서 내용을 바탕으로 답변하는 문서 분석 어시스턴트입니다. 문서 내용은 다음과 같습니다:\n\n" + document_text
-                        },
-                        {"role": "user", "content": query}
-                    ],
-                    temperature=0.3
-                )
-
-                answer = response.choices[0].message.content
-                st.session_state.docchat_history.append({"role": "assistant", "content": answer})
-                st.markdown(bot_css.format(answer), unsafe_allow_html=True)
-
-            except Exception as e:
-                st.error(f"❌ 오류 발생: {str(e)}")
-
+                try:
+                    client = OpenAI(api_key=st.session_state.api_key)
+                    response = client.chat.completions.create(
+                        model="gpt-4-1106-preview",
+                        messages=[
+                            {
+                                "role": "system",
+                                "content": "다음은 사용자가 업로드한 PDF 문서의 내용입니다. 이 내용을 참고해 사용자 질문에 정확하고 간결하게 답하세요:\n\n" + document_text[:8000]  # 길이 제한
+                            },
+                            {"role": "user", "content": query}
+                        ],
+                        temperature=0.3
+                    )
+                    answer = response.choices[0].message.content
+                    st.session_state.pdfchat_history.append({"role": "assistant", "content": answer})
+                    st.markdown(bot_css.format(answer), unsafe_allow_html=True)
+                except Exception as e:
+                    st.error(f"❌ GPT 오류: {str(e)}")
+        except Exception as e:
+            st.error(f"❌ PDF 추출 실패: {str(e)}")
     else:
-        st.info("📄 먼저 문서를 업로드해주세요.")
-
-
+        st.info("📄 PDF 문서를 업로드하세요.")
