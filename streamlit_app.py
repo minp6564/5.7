@@ -34,6 +34,13 @@ bot_css = """
         {}</span>
 </div>
 """
+# --- PDF에서 텍스트 추출 ---
+def extract_text_from_pdf(uploaded_pdf) -> str:
+    pdf = fitz.open(stream=uploaded_pdf.read(), filetype="pdf")
+    text = ""
+    for page in pdf:
+        text += page.get_text()
+    return text
 
 # --- 일반 챗봇 페이지 ---
 if page == "💬 일반 챗봇":
@@ -123,14 +130,6 @@ elif page == "📚 도서관 챗봇":
         except Exception as e:
             st.error(f"❌ 오류 발생: {str(e)}")
 
-
-# --- PDF에서 텍스트 추출 ---
-def extract_text_from_pdf(uploaded_pdf) -> str:
-    pdf = fitz.open(stream=uploaded_pdf.read(), filetype="pdf")
-    text = ""
-    for page in pdf:
-        text += page.get_text()
-    return text
 
 # --- 페이지 시작 ---
 elif page == "📄 문서 챗봇":
