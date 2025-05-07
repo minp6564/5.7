@@ -68,6 +68,14 @@ if page == "💬 일반 챗봇":
             st.error(f"❌ 에러 발생: {str(e)}")
 
 # --- 도서관 챗봇 페이지 ---
+# 규정 불러오기
+@st.cache_data
+def load_library_rules():
+    with open("library_rules.txt", "r", encoding="utf-8") as f:
+        return f.read()
+
+library_rules = load_library_rules()
+
 elif page == "📚 도서관 챗봇":
     st.markdown("<h1 style='text-align: center;'>📚 국립부경대학교 도서관 챗봇</h1>", unsafe_allow_html=True)
 
