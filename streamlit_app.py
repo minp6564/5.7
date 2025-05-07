@@ -135,8 +135,22 @@ elif page == "📚 도서관 챗봇":
 elif page == "📄 문서 챗봇":
     st.markdown("<h1 style='text-align: center;'>📄 PDF 기반 문서 챗봇</h1>", unsafe_allow_html=True)
 
-    # PDF 업로드
+    # 파일 업로드
     uploaded_pdf = st.file_uploader("📂 PDF 파일을 업로드하세요", type="pdf")
+    
+    if uploaded_pdf:
+        # ✅ 텍스트 추출 → session_state에 저장
+        if "pdf_text" not in st.session_state or st.session_state.get("pdf_filename") != uploaded_pdf.name:
+            st.session_state.pdf_text = extract_text_from_pdf(uploaded_pdf)
+            st.session_state.pdf_filename = uploaded_pdf.name  # 같은 파일 다시 업로드 시 중복 방지
+            st.success("✅ PDF 텍스트 추출 성공!")
+    
+    document_text = st.session_state.get("pdf_text", "")
+    
+    if not document_text:
+        st.info("📄 문서를 업로드해주세요.")
+        st.stop()
+
 
     if uploaded_pdf:
         try:
