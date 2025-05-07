@@ -14,11 +14,13 @@ st.session_state.api_key = st.text_input("🔑 OpenAI API Key", type="password",
 if 'messages' not in st.session_state:
     st.session_state.messages = []
 
-# Clear 버튼
-if st.button("🧹 대화 초기화"):
-    st.session_state.messages = []
+# ✅ 버튼을 왼쪽에 배치
+col1, col2 = st.columns([1, 6])
+with col1:
+    if st.button("🧹 대화 초기화"):
+        st.session_state.messages = []
 
-# 스타일 정의
+# 말풍선 스타일
 user_css = """
 <div style='text-align: right; margin: 10px 0;'>
     <span style='background-color: #DCF8C6; padding: 10px 15px; border-radius: 20px; display: inline-block; max-width: 80%;'>
