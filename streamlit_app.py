@@ -68,19 +68,20 @@ if page == "💬 일반 챗봇":
             st.error(f"❌ 에러 발생: {str(e)}")
 
 # --- 도서관 챗봇 페이지 ---
-# 규정 불러오기
-@st.cache_data
-def load_library_rules():
-    with open("library_rules.txt", "r", encoding="utf-8") as f:
-        return f.read()
 
-library_rules = load_library_rules()
+
 
 elif page == "📚 도서관 챗봇":
     st.markdown("<h1 style='text-align: center;'>📚 국립부경대학교 도서관 챗봇</h1>", unsafe_allow_html=True)
 
-    # 규정 내용 여기에 붙이기 (줄임표는 실제 코드에서 제거)
-    library_rules = """국립부경대학교 도서관 규정 전문을 여기에 붙여주세요 (너무 길어 생략)."""
+    # 규정 불러오기
+    @st.cache_data
+    def load_library_rules():
+        with open("library_rules.txt", "r", encoding="utf-8") as f:
+            return f.read()
+            
+    library_rules = load_library_rules()
+
 
     if "chatbot_history" not in st.session_state:
         st.session_state.chatbot_history = []
