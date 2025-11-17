@@ -73,7 +73,7 @@ if question := st.chat_input("도서관 규정에 대해 질문하세요..."):
 
     try:
         response = client.chat.completions.create(
-            model="gpt-4-1106-preview",
+            model="gpt-5-mini",
             messages=[
                 {
                     "role": "system",
