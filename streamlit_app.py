@@ -69,7 +69,7 @@ if page == "💬 일반 챗봇":
                 for m in st.session_state.messages
             ]
             response = client.chat.completions.create(
-                model="gpt-4-1106-preview",
+                model="gpt-5-mini",
                 messages=chat_messages,
                 temperature=0.7
             )
