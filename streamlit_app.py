@@ -3,23 +3,7 @@ from openai import OpenAI
 
 st.set_page_config(page_title="마약류 법률·예방 챗봇", layout="centered")
 
-# --------------------------------------------------
-# 🔑 API Key Input
-# --------------------------------------------------
-if "api_key" not in st.session_state:
-    st.session_state.api_key = ""
-
-st.session_state.api_key = st.text_input(
-    "🔑 OpenAI API Key", 
-    type="password", 
-    value=st.session_state.api_key
-)
-
-if not st.session_state.api_key:
-    st.warning("먼저 OpenAI API Key를 입력하세요.")
-    st.stop()
-
-client = OpenAI(api_key=st.session_state.api_key)
+client = OpenAI(api_key="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")
 
 # --------------------------------------------------
 # 🎨 Chat bubble styles
