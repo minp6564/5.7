@@ -71,7 +71,6 @@ if page == "💬 일반 챗봇":
             response = client.chat.completions.create(
                 model="gpt-5-mini",
                 messages=chat_messages,
-                temperature=0.7
             )
             reply = response.choices[0].message.content
             st.session_state.messages.append({"role": "assistant", "content": reply})
@@ -122,7 +121,6 @@ elif page == "📚 도서관 챗봇":
                     },
                     {"role": "user", "content": question}
                 ],
-                temperature=0.3
             )
             reply = response.choices[0].message.content
             st.session_state.chatbot_history.append({"role": "assistant", "content": reply})
@@ -186,7 +184,6 @@ elif page == "📄 문서 챗봇":
                     },
                     {"role": "user", "content": query}
                 ],
-                temperature=0.3
             )
             reply = response.choices[0].message.content
             st.session_state.pdfchat_history.append({"role": "assistant", "content": reply})
